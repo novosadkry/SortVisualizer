@@ -35,7 +35,7 @@ namespace SortVisualizer
 
                 var size = new Vector2f
                 {
-                    X =  Size.X * (1.0f / Digits.Length),
+                    X =  Size.X * (1.0f / Digits.Length) - 0.5f,
                     Y = -Size.Y * (value - MinValue) / MaxValue
                 };
 

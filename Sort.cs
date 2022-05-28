@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using SFML.System;
 
 namespace SortVisualizer
 {
@@ -24,7 +25,7 @@ namespace SortVisualizer
     {
         public static IEnumerator BubbleSort(Digit[] digits)
         {
-            Console.WriteLine("[SortVisualizer] Performing BubbleSort...");
+            Console.Write("[SortVisualizer] Performing BubbleSort... ");
 
             for (int i = 0; i < digits.Length; i++)
             {
@@ -36,7 +37,7 @@ namespace SortVisualizer
                     digits[a].State = DigitState.Selected;
                     digits[b].State = DigitState.Selected;
 
-                    yield return null;
+                    yield return j;
 
                     if (digits[a].Value > digits[b].Value)
                         Swap(digits, a, b);
@@ -44,16 +45,49 @@ namespace SortVisualizer
                     digits[a].State = DigitState.None;
                     digits[b].State = DigitState.Sorted;
 
-                    yield return null;
+                    yield return j;
                 }
             }
 
-            Console.WriteLine("[SortVisualizer] Done!");
+            Console.WriteLine("Done!");
+        }
+
+        public static IEnumerator SelectionSort(Digit[] digits)
+        {
+            Console.Write("[SortVisualizer] Performing BubbleSort... ");
+
+            for (int i = 0; i < digits.Length; i++)
+            {
+                int m = i;
+
+                for (int j = i + 1; j < digits.Length; j++)
+                {
+                    digits[j].State = DigitState.Selected;
+
+                    yield return j;
+
+                    digits[j].State = DigitState.None;
+
+                    if (digits[m].Value > digits[j].Value)
+                    {
+                        digits[m].State = DigitState.None;
+                        digits[j].State = DigitState.Selected;
+                        m = j;
+                    }
+
+                    yield return j;
+                }
+
+                Swap(digits, m, i);
+                digits[i].State = DigitState.Sorted;
+            }
+
+            Console.WriteLine("Done!");
         }
 
         public static IEnumerator Shuffle(Digit[] digits)
         {
-            Console.WriteLine("[SortVisualizer] Shuffle...");
+            Console.Write("[SortVisualizer] Shuffling... ");
 
             var random = new Random();
             
@@ -64,22 +98,23 @@ namespace SortVisualizer
                 digits[i].State = DigitState.Selected;
                 digits[j].State = DigitState.Selected;
 
-                yield return null;
+                yield return j;
 
                 Swap(digits, i, j);
+                yield return Pause(.01f);
 
                 digits[i].State = DigitState.None;
                 digits[j].State = DigitState.None;
 
-                yield return null;
+                yield return j;
             }
 
-            Console.WriteLine("[SortVisualizer] Done!");
+            Console.WriteLine("Done!");
         }
 
         public static IEnumerator Traverse(Digit[] digits)
         {
-            Console.WriteLine("[SortVisualizer] Traverse...");
+            Console.Write("[SortVisualizer] Traversing... ");
 
             for (int i = 0; i < digits.Length; i++)
                 digits[i].State = DigitState.None;
@@ -89,7 +124,8 @@ namespace SortVisualizer
             for (int i = 0; i < digits.Length; i++)
             {
                 digits[i].State = DigitState.Sorted;
-                yield return Pause(5);
+                yield return Pause(.01f);
+                yield return i;
             }
 
             yield return null;
@@ -97,12 +133,14 @@ namespace SortVisualizer
             for (int i = 0; i < digits.Length; i++)
                 digits[i].State = DigitState.None;
 
-            Console.WriteLine("[SortVisualizer] Done!");
+            Console.WriteLine("Done!");
         }
 
-        public static IEnumerator Pause(int ticks)
+        public static IEnumerator Pause(float seconds)
         {
-            for (int i = 0; i < ticks; i++)
+            var clock = new Clock();
+
+            while (clock.ElapsedTime.AsSeconds() < seconds)
                 yield return null;
         }
 

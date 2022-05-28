@@ -6,6 +6,7 @@ namespace SortVisualizer
 {
     public class App
     {
+        public bool EnableSound { get; set; }
         public float SimulationDelay { get; set; } 
 
         private readonly Clock _clock = new();
@@ -31,6 +32,8 @@ namespace SortVisualizer
 
         private void Init()
         {
+            Oscillator.Init();
+
             _canvas.Size = new Vector2i(800, 600);
 
             _canvas.Digits = Enumerable.Range(1, 100)
@@ -56,10 +59,14 @@ namespace SortVisualizer
                 if (!iterator.MoveNext())
                     _queue.RemoveFirst();
 
-                if (iterator.Current is IEnumerator e)
+                else if (iterator.Current is IEnumerator e)
                     _queue.AddFirst(e);
 
-                _delay = SimulationDelay;
+                else if (EnableSound && iterator.Current is int i)
+                    Oscillator.Play((float)i / _canvas.Digits.Length);
+
+                else
+                    _delay = SimulationDelay;
             }
 
             window.Draw(_canvas);
