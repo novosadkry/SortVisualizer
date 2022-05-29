@@ -11,6 +11,8 @@ namespace SortVisualizer
         public int MaxValue { get; set; }
         public int MinValue { get; set; }
 
+        private readonly RectangleShape _column = new();
+
         public void Draw(RenderTarget target, RenderStates states)
         {
             for (int i = 0; i < Digits.Length; i++)
@@ -39,14 +41,11 @@ namespace SortVisualizer
                     Y = -Size.Y * (value - MinValue) / MaxValue
                 };
 
-                var column = new RectangleShape
-                {
-                    Position = pos,
-                    Size = size,
-                    FillColor = color
-                };
+                _column.Position = pos;
+                _column.Size = size;
+                _column.FillColor = color;
 
-                target.Draw(column);
+                target.Draw(_column);
             }
         }
     }
