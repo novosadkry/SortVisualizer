@@ -21,8 +21,19 @@ namespace SortVisualizer
         }
     }
 
-    public static class Sort
+    public class Sort
     {
+        public string Name { get; set; }
+        public Func<Digit[], IEnumerator> Function;
+
+        public static readonly Sort[] AvailableSorts =
+        {
+            new() { Name = "Shuffle", Function = Shuffle },
+            new() { Name = "Traverse", Function = Traverse },
+            new() { Name = "BubbleSort", Function = BubbleSort },
+            new() { Name = "SelectionSort", Function = SelectionSort }
+        };
+
         public static IEnumerator BubbleSort(Digit[] digits)
         {
             Console.Write("[SortVisualizer] Performing BubbleSort... ");
@@ -54,7 +65,7 @@ namespace SortVisualizer
 
         public static IEnumerator SelectionSort(Digit[] digits)
         {
-            Console.Write("[SortVisualizer] Performing BubbleSort... ");
+            Console.Write("[SortVisualizer] Performing SelectionSort... ");
 
             for (int i = 0; i < digits.Length; i++)
             {
@@ -90,7 +101,7 @@ namespace SortVisualizer
             Console.Write("[SortVisualizer] Shuffling... ");
 
             var random = new Random();
-            
+
             for (int i = 0; i < digits.Length; i++)
             {
                 int j = random.Next(0, digits.Length);
@@ -118,7 +129,7 @@ namespace SortVisualizer
 
             for (int i = 0; i < digits.Length; i++)
                 digits[i].State = DigitState.None;
-            
+
             yield return null;
 
             for (int i = 0; i < digits.Length; i++)
@@ -129,7 +140,7 @@ namespace SortVisualizer
             }
 
             yield return null;
-         
+
             for (int i = 0; i < digits.Length; i++)
                 digits[i].State = DigitState.None;
 

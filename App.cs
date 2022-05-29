@@ -33,6 +33,7 @@ namespace SortVisualizer
         private void Init()
         {
             Oscillator.Init();
+            HandleInput();
 
             _canvas.Size = new Vector2i(800, 600);
 
@@ -70,6 +71,32 @@ namespace SortVisualizer
             }
 
             window.Draw(_canvas);
+        }
+
+        private void HandleInput()
+        {
+            Task.Run(async () =>
+            {
+                while (true)
+                {
+                    string? input = await Console.In.ReadLineAsync();
+
+                    if (string.IsNullOrWhiteSpace(input))
+                        continue;
+
+                    string[] commands = input.Split(' ');
+                    foreach (string command in commands)
+                    {
+                        var sort = Sort.AvailableSorts
+                            .FirstOrDefault(x => x.Name.ToLower() == command);
+
+                        if (sort == null) 
+                            continue;
+
+                        _queue.AddLast(sort.Function(_canvas.Digits));
+                    }
+                }
+            });
         }
     }
 }
