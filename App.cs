@@ -32,7 +32,6 @@ namespace SortVisualizer
 
         private void Init()
         {
-            Oscillator.Init();
             HandleInput();
 
             _canvas.Size = new Vector2i(800, 600);
@@ -62,9 +61,6 @@ namespace SortVisualizer
 
                 else if (iterator.Current is IEnumerator e)
                     _queue.AddFirst(e);
-
-                else if (EnableSound && iterator.Current is int i)
-                    Oscillator.Play((float)i / _canvas.Digits.Length);
 
                 else
                     _delay = SimulationDelay;

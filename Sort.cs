@@ -48,7 +48,7 @@ namespace SortVisualizer
                     digits[a].State = DigitState.Selected;
                     digits[b].State = DigitState.Selected;
 
-                    yield return j;
+                    yield return null;
 
                     if (digits[a].Value > digits[b].Value)
                         Swap(digits, a, b);
@@ -56,7 +56,7 @@ namespace SortVisualizer
                     digits[a].State = DigitState.None;
                     digits[b].State = DigitState.Sorted;
 
-                    yield return j;
+                    yield return null;
                 }
             }
 
@@ -75,7 +75,7 @@ namespace SortVisualizer
                 {
                     digits[j].State = DigitState.Selected;
 
-                    yield return j;
+                    yield return null;
 
                     digits[j].State = DigitState.None;
 
@@ -86,7 +86,7 @@ namespace SortVisualizer
                         m = j;
                     }
 
-                    yield return j;
+                    yield return null;
                 }
 
                 Swap(digits, m, i);
@@ -109,7 +109,7 @@ namespace SortVisualizer
                 digits[i].State = DigitState.Selected;
                 digits[j].State = DigitState.Selected;
 
-                yield return j;
+                yield return null;
 
                 Swap(digits, i, j);
                 yield return Pause(.01f);
@@ -117,7 +117,7 @@ namespace SortVisualizer
                 digits[i].State = DigitState.None;
                 digits[j].State = DigitState.None;
 
-                yield return j;
+                yield return null;
             }
 
             Console.WriteLine("Done!");
@@ -136,7 +136,6 @@ namespace SortVisualizer
             {
                 digits[i].State = DigitState.Sorted;
                 yield return Pause(.01f);
-                yield return i;
             }
 
             yield return null;
