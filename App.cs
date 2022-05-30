@@ -9,11 +9,18 @@ namespace SortVisualizer
         public bool EnableSound { get; set; }
         public float SimulationDelay { get; set; } 
 
-        private readonly Clock _clock = new();
-        private readonly Canvas _canvas = new();
-        private readonly LinkedList<IEnumerator> _queue = new();
+        private readonly Clock _clock;
+        private readonly Canvas _canvas;
+        private readonly LinkedList<IEnumerator> _queue;
 
         private float _delay;
+
+        public App()
+        {
+            _clock = new Clock();
+            _canvas = new Canvas();
+            _queue = new LinkedList<IEnumerator>();
+        }
 
         public void Run()
         {
