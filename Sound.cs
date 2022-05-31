@@ -6,47 +6,69 @@ namespace SortVisualizer
     public class Emitter : SoundStream
     {
         private const int BufferSize = 4096;
+        private const int MaxOscillators = 128;
 
         public Emitter()
         {
-            Notes = new List<Note>();
             Initialize(1, 44100);
+            Oscillators = new List<Oscillator>(MaxOscillators);
         }
 
-        private List<Note> Notes { get; }
+        private List<Oscillator> Oscillators { get; }
+        private readonly short[] _samples = new short[BufferSize];
 
         protected override bool OnGetData(out short[] samples)
         {
-            samples = new short[BufferSize];
+            Array.Clear(_samples, 0, _samples.Length);
 
-            lock (Notes)
+            lock (Oscillators)
             {
-                foreach (var note in Notes)
+                double step = 1.0 / SampleRate;
+                double amp = 1.0 / Oscillators.Count;
+
+                foreach (var osc in Oscillators)
                 {
-                    var env = note.Envelope;
-                    var osc = note.Oscillator;
+                    if (osc.Ended)
+                        continue;
 
-                    double x = note.TimeSpent;
-                    double d = note.Duration;
+                    var env = osc.Note.Envelope;
 
-                    for (int i = 0; i < samples.Length; i++)
+                    double x = osc.TimeSpent;
+                    double d = osc.Note.Duration;
+
+                    for (int i = 0; i < _samples.Length; i++)
                     {
-                        samples[i] += (short)(osc.Wave(x) * env.ADSR(x / d));
-                        x += 1.0 / SampleRate;
+                        _samples[i] += (short)(osc.Wave(x) * env.ADSR(x / d) * amp);
+                        x += step;
                     }
 
-                    note.TimeSpent = x;
+                    osc.TimeSpent = x;
                 }
-
-                Notes.RemoveAll(x => x.Ended);
             }
 
+            samples = _samples;
             return true;
         }
 
         public void AddNote(Note note)
         {
-            lock (Notes) Notes.Add(note);
+            lock (Oscillators)
+            {
+                if (Oscillators.Count < MaxOscillators)
+                {
+                    Oscillators.Add(new Oscillator(note));
+                    return;
+                }
+
+                var oldest = Oscillators
+                    .MaxBy(x => x.TimeSpent);
+
+                if (oldest == null)
+                    return;
+
+                oldest.Note = note;
+                oldest.TimeSpent = 0.0;
+            }
         }
 
         protected override void OnSeek(Time timeOffset)
@@ -57,40 +79,38 @@ namespace SortVisualizer
 
     public class Note
     {
-        public Oscillator Oscillator { get; set; }
-        public Envelope   Envelope   { get; set; }
+        public Envelope Envelope { get; set; }
 
-        public double Duration  { get; set; }
-        public double TimeSpent { get; set; }
-
-        public bool Ended => TimeSpent > Duration;
+        public double Duration { get; set; }
+        public double Amplitude { get; set; }
+        public double Frequency { get; set; }
 
         public Note(double duration, double frequency)
         {
-            Oscillator = new Oscillator();
             Envelope = new Envelope();
 
+            Amplitude = 6000;
             Duration = duration;
-            TimeSpent = 0.0;
-
-            Oscillator.Frequency = frequency;
+            Frequency = frequency;
         }
     }
 
     public class Oscillator
     {
-        public double Amplitude { get; set; }
-        public double Frequency { get; set; }
+        public Note Note { get; set; }
 
-        public Oscillator()
+        public double TimeSpent { get; set; }
+        public bool Ended => TimeSpent > Note.Duration;
+
+        public Oscillator(Note note)
         {
-            Amplitude = 6000;
-            Frequency = 440;
+            Note = note;
+            TimeSpent = 0.0;
         }
 
         public double Wave(double x)
         {
-            return WaveSin(x * Frequency) * Amplitude;
+            return WaveTriangle(x * Note.Frequency) * Note.Amplitude;
         }
 
         private static double WaveSin(double x)
@@ -101,6 +121,15 @@ namespace SortVisualizer
         private static double WaveSquare(double x)
         {
             return WaveSin(x) > 0.0 ? 1.0 : -1.0;
+        }
+
+        private static double WaveTriangle(double x)
+        {
+            x %= 1.0;
+
+            if (x <= 0.25) return 4.0 * x;
+            if (x <= 0.75) return 2.0 - 4.0 * x;
+            return 4.0 * x - 4.0;
         }
     }
 
