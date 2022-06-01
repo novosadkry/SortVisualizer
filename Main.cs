@@ -4,7 +4,9 @@
     {
         public static void Main(string[] args)
         {
-            var app = new App();
+            var app = App.Instance;
+            app.SimulationDelay = 0.1f;
+
             app.Run();
         }
     }

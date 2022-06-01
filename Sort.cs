@@ -38,6 +38,8 @@ namespace SortVisualizer
         {
             Console.Write("[SortVisualizer] Performing BubbleSort... ");
 
+            var delay = App.Instance.SimulationDelay;
+
             for (int i = 0; i < digits.Length; i++)
             {
                 for (int j = 0; j < digits.Length - i - 1; j++)
@@ -48,7 +50,7 @@ namespace SortVisualizer
                     digits[a].State = DigitState.Selected;
                     digits[b].State = DigitState.Selected;
 
-                    yield return null;
+                    yield return Pause(delay);
 
                     if (digits[a].Value > digits[b].Value)
                         Swap(digits, a, b);
@@ -56,7 +58,7 @@ namespace SortVisualizer
                     digits[a].State = DigitState.None;
                     digits[b].State = DigitState.Sorted;
 
-                    yield return null;
+                    yield return Pause(delay);
                 }
             }
 
@@ -67,6 +69,8 @@ namespace SortVisualizer
         {
             Console.Write("[SortVisualizer] Performing SelectionSort... ");
 
+            var delay = App.Instance.SimulationDelay;
+
             for (int i = 0; i < digits.Length; i++)
             {
                 int m = i;
@@ -75,7 +79,7 @@ namespace SortVisualizer
                 {
                     digits[j].State = DigitState.Selected;
 
-                    yield return null;
+                    yield return Pause(delay);
 
                     digits[j].State = DigitState.None;
 
@@ -86,7 +90,7 @@ namespace SortVisualizer
                         m = j;
                     }
 
-                    yield return null;
+                    yield return Pause(delay);
                 }
 
                 Swap(digits, m, i);
@@ -101,6 +105,7 @@ namespace SortVisualizer
             Console.Write("[SortVisualizer] Shuffling... ");
 
             var random = new Random();
+            var delay = App.Instance.SimulationDelay;
 
             for (int i = 0; i < digits.Length; i++)
             {
@@ -109,7 +114,7 @@ namespace SortVisualizer
                 digits[i].State = DigitState.Selected;
                 digits[j].State = DigitState.Selected;
 
-                yield return null;
+                yield return Pause(delay);
 
                 Swap(digits, i, j);
                 yield return Pause(.01f);
@@ -117,7 +122,7 @@ namespace SortVisualizer
                 digits[i].State = DigitState.None;
                 digits[j].State = DigitState.None;
 
-                yield return null;
+                yield return Pause(delay);
             }
 
             Console.WriteLine("Done!");
@@ -127,18 +132,20 @@ namespace SortVisualizer
         {
             Console.Write("[SortVisualizer] Traversing... ");
 
+            var delay = App.Instance.SimulationDelay;
+
             for (int i = 0; i < digits.Length; i++)
                 digits[i].State = DigitState.None;
 
-            yield return null;
+            yield return Pause(delay);
 
             for (int i = 0; i < digits.Length; i++)
             {
                 digits[i].State = DigitState.Sorted;
-                yield return Pause(.01f);
+                yield return Pause(delay);
             }
 
-            yield return null;
+            yield return Pause(delay);
 
             for (int i = 0; i < digits.Length; i++)
                 digits[i].State = DigitState.None;
@@ -146,11 +153,11 @@ namespace SortVisualizer
             Console.WriteLine("Done!");
         }
 
-        public static IEnumerator Pause(float seconds)
+        public static IEnumerator Pause(float millis)
         {
             var clock = new Clock();
 
-            while (clock.ElapsedTime.AsSeconds() < seconds)
+            while (clock.ElapsedTime.AsSeconds() * 1000 < millis)
                 yield return null;
         }
 

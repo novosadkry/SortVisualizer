@@ -6,18 +6,19 @@ namespace SortVisualizer
 {
     public class App
     {
+        private static readonly Lazy<App> Lazy 
+            = new(() => new App());
+
+        public static App Instance => Lazy.Value;
+
         public bool EnableSound { get; set; }
         public float SimulationDelay { get; set; } 
 
-        private readonly Clock _clock;
         private readonly Canvas _canvas;
         private readonly LinkedList<IEnumerator> _queue;
 
-        private float _delay;
-
-        public App()
+        private App()
         {
-            _clock = new Clock();
             _canvas = new Canvas();
             _queue = new LinkedList<IEnumerator>();
         }
@@ -32,15 +33,13 @@ namespace SortVisualizer
             Init();
 
             window.Init();
-            window.Tick += Tick;
+            window.Tick += Draw;
 
             window.Run();
         }
 
         private void Init()
         {
-            HandleInput();
-
             _canvas.Size = new Vector2i(800, 600);
 
             _canvas.Digits = Enumerable.Range(1, 100)
@@ -53,53 +52,58 @@ namespace SortVisualizer
             _queue.AddLast(Sort.Shuffle(_canvas.Digits));
             _queue.AddLast(Sort.BubbleSort(_canvas.Digits));
             _queue.AddLast(Sort.Traverse(_canvas.Digits));
+
+            Task.Run(HandleInput);
+            Task.Run(SortEntry);
         }
 
-        private void Tick(Window window)
+        private void Draw(Window window)
         {
-            _delay -= _clock.Restart().AsSeconds();
-
-            if (_delay <= 0 && _queue.First != null)
-            {
-                var iterator = _queue.First.Value;
-
-                if (!iterator.MoveNext())
-                    _queue.RemoveFirst();
-
-                else if (iterator.Current is IEnumerator e)
-                    _queue.AddFirst(e);
-
-                else
-                    _delay = SimulationDelay;
-            }
-
             window.Draw(_canvas);
         }
 
-        private void HandleInput()
+        private void SortEntry()
         {
-            Task.Run(async () =>
+            while (true)
             {
-                while (true)
+                lock (_queue)
                 {
-                    string? input = await Console.In.ReadLineAsync();
+                    if (_queue.First == null) continue;
+                    var iterator = _queue.First.Value;
 
-                    if (string.IsNullOrWhiteSpace(input))
+                    if (!iterator.MoveNext())
+                        _queue.RemoveFirst();
+
+                    else if (iterator.Current is IEnumerator e)
+                        _queue.AddFirst(e);
+                }
+            }
+        }
+
+        private async Task HandleInput()
+        {
+            while (true)
+            {
+                string? input = await Console.In.ReadLineAsync();
+
+                if (string.IsNullOrWhiteSpace(input))
+                    continue;
+
+                string[] commands = input.Split(' ');
+                foreach (string command in commands)
+                {
+                    var sort = Sort.AvailableSorts
+                        .FirstOrDefault(x => x.Name.ToLower() == command);
+
+                    if (sort == null)
                         continue;
 
-                    string[] commands = input.Split(' ');
-                    foreach (string command in commands)
+                    lock (_queue)
                     {
-                        var sort = Sort.AvailableSorts
-                            .FirstOrDefault(x => x.Name.ToLower() == command);
-
-                        if (sort == null) 
-                            continue;
-
                         _queue.AddLast(sort.Function(_canvas.Digits));
                     }
                 }
-            });
+            }
         }
     }
 }
