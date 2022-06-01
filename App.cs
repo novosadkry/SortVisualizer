@@ -11,15 +11,18 @@ namespace SortVisualizer
 
         public static App Instance => Lazy.Value;
 
+        public Canvas Canvas { get; }
         public bool EnableSound { get; set; }
         public float SimulationDelay { get; set; } 
+        public float SoundSustain { get; set; }
 
-        private readonly Canvas _canvas;
+        private readonly Emitter _emitter;
         private readonly LinkedList<IEnumerator> _queue;
 
         private App()
         {
-            _canvas = new Canvas();
+            Canvas = new Canvas();
+            _emitter = new Emitter();
             _queue = new LinkedList<IEnumerator>();
         }
 
@@ -40,18 +43,21 @@ namespace SortVisualizer
 
         private void Init()
         {
-            _canvas.Size = new Vector2i(800, 600);
+            if (EnableSound)
+                _emitter.Play();
 
-            _canvas.Digits = Enumerable.Range(1, 100)
+            Canvas.Size = new Vector2i(800, 600);
+
+            Canvas.Digits = Enumerable.Range(1, 100)
                 .Select(x => (Digit)x)
                 .ToArray();
 
-            _canvas.MinValue = 0;
-            _canvas.MaxValue = 100;
+            Canvas.MinValue = 0;
+            Canvas.MaxValue = 100;
 
-            _queue.AddLast(Sort.Shuffle(_canvas.Digits));
-            _queue.AddLast(Sort.BubbleSort(_canvas.Digits));
-            _queue.AddLast(Sort.Traverse(_canvas.Digits));
+            _queue.AddLast(Sort.Shuffle(Canvas.Digits));
+            _queue.AddLast(Sort.BubbleSort(Canvas.Digits));
+            _queue.AddLast(Sort.Traverse(Canvas.Digits));
 
             Task.Run(HandleInput);
             Task.Run(SortEntry);
@@ -59,7 +65,7 @@ namespace SortVisualizer
 
         private void Draw(Window window)
         {
-            window.Draw(_canvas);
+            window.Draw(Canvas);
         }
 
         private void SortEntry()
@@ -76,6 +82,9 @@ namespace SortVisualizer
 
                     else if (iterator.Current is IEnumerator e)
                         _queue.AddFirst(e);
+
+                    else if (iterator.Current is Note n)
+                        _emitter.AddNote(n);
                 }
             }
         }
@@ -100,7 +109,7 @@ namespace SortVisualizer
 
                     lock (_queue)
                     {
-                        _queue.AddLast(sort.Function(_canvas.Digits));
+                        _queue.AddLast(sort.Function(Canvas.Digits));
                     }
                 }
             }

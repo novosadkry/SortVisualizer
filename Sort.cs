@@ -53,7 +53,7 @@ namespace SortVisualizer
                     yield return Pause(delay);
 
                     if (digits[a].Value > digits[b].Value)
-                        Swap(digits, a, b);
+                        yield return Swap(digits, a, b);
 
                     digits[a].State = DigitState.None;
                     digits[b].State = DigitState.Sorted;
@@ -90,10 +90,13 @@ namespace SortVisualizer
                         m = j;
                     }
 
+                    yield return MakeSound(digits, m);
+                    yield return MakeSound(digits, j);
+
                     yield return Pause(delay);
                 }
 
-                Swap(digits, m, i);
+                yield return Swap(digits, m, i);
                 digits[i].State = DigitState.Sorted;
             }
 
@@ -116,8 +119,8 @@ namespace SortVisualizer
 
                 yield return Pause(delay);
 
-                Swap(digits, i, j);
-                yield return Pause(.01f);
+                yield return Swap(digits, i, j);
+                yield return Pause(delay);
 
                 digits[i].State = DigitState.None;
                 digits[j].State = DigitState.None;
@@ -153,20 +156,32 @@ namespace SortVisualizer
             Console.WriteLine("Done!");
         }
 
-        public static IEnumerator Pause(float millis)
+        public static IEnumerator Pause(float seconds)
         {
             var clock = new Clock();
 
-            while (clock.ElapsedTime.AsSeconds() * 1000 < millis)
+            while (clock.ElapsedTime.AsSeconds() < seconds)
                 yield return null;
         }
 
-        private static void Swap(Digit[] digits, int i, int j)
+        private static Note MakeSound(Digit[] digits, int i)
         {
-            ref var a = ref digits[i];
-            ref var b = ref digits[j];
+            float min = App.Instance.Canvas.MinValue;
+            float max = App.Instance.Canvas.MaxValue;
 
-            (a, b) = (b, a);
+            float n = (digits[i].Value - min) / max;
+            float d = App.Instance.SimulationDelay;
+            float s = App.Instance.SoundSustain;
+
+            return new Note(d * s, 120 + 1200 * n * n);
+        }
+
+        private static IEnumerator Swap(Digit[] digits, int i, int j)
+        {
+            (digits[i], digits[j]) = (digits[j], digits[i]);
+
+            yield return MakeSound(digits, i);
+            yield return MakeSound(digits, j);
         }
     }
 }
