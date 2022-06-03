@@ -23,13 +23,20 @@ namespace SortVisualizer
 
     public class SortArray
     {
-        public App App { get; }
-        public Digit[] Digits { get; }
+        public App App { get; set; }
 
-        public SortArray(App app, Digit[] digits)
+        public Digit[] Digits { get; }
+        public int Min { get; }
+        public int Max { get; }
+
+        public SortArray(int min, int max)
         {
-            App = app;
-            Digits = digits;
+            Digits = Enumerable.Range(min + 1, max)
+                .Select(x => (Digit)x)
+                .ToArray();
+
+            Min = min;
+            Max = max;
         }
     }
 
@@ -135,7 +142,7 @@ namespace SortVisualizer
                 yield return Pause(delay);
 
                 yield return Swap(array, i, j);
-                yield return Pause(delay);
+                yield return Pause(delay * 20.0f);
 
                 digits[i].State = DigitState.None;
                 digits[j].State = DigitState.None;
@@ -162,7 +169,7 @@ namespace SortVisualizer
             {
                 digits[i].State = DigitState.Sorted;
                 yield return MakeSound(array, i);
-                yield return Pause(delay);
+                yield return Pause(delay * 20.0f);
             }
 
             yield return Pause(delay);
@@ -185,8 +192,8 @@ namespace SortVisualizer
         {
             var digits = array.Digits;
 
-            float min = array.App.Canvas.MinValue;
-            float max = array.App.Canvas.MaxValue;
+            float min = array.App.SortArray.Min;
+            float max = array.App.SortArray.Max;
 
             float n = (digits[i].Value - min) / max;
             float d = array.App.SimulationDelay;

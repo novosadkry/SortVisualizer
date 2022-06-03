@@ -8,14 +8,13 @@ namespace SortVisualizer
         public App App { get; set; }
         public Vector2i Size { get; set; }
 
-        public int MaxValue { get; set; }
-        public int MinValue { get; set; }
-
         private readonly RectangleShape _column = new();
 
         public void Draw(RenderTarget target, RenderStates states)
         {
             var digits = App.SortArray.Digits;
+            int min = App.SortArray.Min;
+            int max = App.SortArray.Max;
 
             for (int i = 0; i < digits.Length; i++)
             {
@@ -40,7 +39,7 @@ namespace SortVisualizer
                 var size = new Vector2f
                 {
                     X =  Size.X * (1.0f / digits.Length) - 0.5f,
-                    Y = -Size.Y * (value - MinValue) / MaxValue
+                    Y = -Size.Y * (value - min) / max
                 };
 
                 _column.Position = pos;

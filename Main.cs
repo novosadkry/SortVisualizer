@@ -6,12 +6,13 @@
         {
             var app = new App
             {
-                SimulationDelay = 0.001f,
                 Audio = {
                     Enabled = true,
                     MaxEmitters = 128,
                     SoundSustain = 20.0f
-                }
+                },
+                SimulationDelay = 0.001f,
+                SortArray = new SortArray(0, 100)
             };
 
             app.Run();

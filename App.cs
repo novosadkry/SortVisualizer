@@ -17,6 +17,7 @@ namespace SortVisualizer
         {
             Audio = new Audio();
             Canvas = new Canvas();
+            SortArray = new SortArray(1, 100);
             _queue = new LinkedList<IEnumerator>();
         }
 
@@ -41,18 +42,8 @@ namespace SortVisualizer
 
             Canvas.App = this;
             Canvas.Size = new Vector2i(800, 600);
-            Canvas.MinValue = 0;
-            Canvas.MaxValue = 100;
 
-            var digits = Enumerable.Range(1, 100)
-                .Select(x => (Digit)x)
-                .ToArray();
-
-            SortArray = new SortArray(this, digits);
-
-            _queue.AddLast(Sort.Shuffle(SortArray));
-            _queue.AddLast(Sort.BubbleSort(SortArray));
-            _queue.AddLast(Sort.Traverse(SortArray));
+            SortArray.App = this;
 
             Task.Run(HandleInput);
             Task.Run(SortEntry);
