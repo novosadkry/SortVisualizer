@@ -21,10 +21,22 @@ namespace SortVisualizer
         }
     }
 
+    public class SortArray
+    {
+        public App App { get; }
+        public Digit[] Digits { get; }
+
+        public SortArray(App app, Digit[] digits)
+        {
+            App = app;
+            Digits = digits;
+        }
+    }
+
     public class Sort
     {
         public string Name { get; set; }
-        public Func<Digit[], IEnumerator> Function;
+        public Func<SortArray, IEnumerator> Function;
 
         public static readonly Sort[] AvailableSorts =
         {
@@ -34,11 +46,12 @@ namespace SortVisualizer
             new() { Name = "SelectionSort", Function = SelectionSort }
         };
 
-        public static IEnumerator BubbleSort(Digit[] digits)
+        public static IEnumerator BubbleSort(SortArray array)
         {
             Console.Write("[SortVisualizer] Performing BubbleSort... ");
 
-            var delay = App.Instance.SimulationDelay;
+            var digits = array.Digits;
+            var delay = array.App.SimulationDelay;
 
             for (int i = 0; i < digits.Length; i++)
             {
@@ -53,7 +66,7 @@ namespace SortVisualizer
                     yield return Pause(delay);
 
                     if (digits[a].Value > digits[b].Value)
-                        yield return Swap(digits, a, b);
+                        yield return Swap(array, a, b);
 
                     digits[a].State = DigitState.None;
                     digits[b].State = DigitState.Sorted;
@@ -65,11 +78,12 @@ namespace SortVisualizer
             Console.WriteLine("Done!");
         }
 
-        public static IEnumerator SelectionSort(Digit[] digits)
+        public static IEnumerator SelectionSort(SortArray array)
         {
             Console.Write("[SortVisualizer] Performing SelectionSort... ");
 
-            var delay = App.Instance.SimulationDelay;
+            var digits = array.Digits;
+            var delay = array.App.SimulationDelay;
 
             for (int i = 0; i < digits.Length; i++)
             {
@@ -90,25 +104,26 @@ namespace SortVisualizer
                         m = j;
                     }
 
-                    yield return MakeSound(digits, m);
-                    yield return MakeSound(digits, j);
+                    yield return MakeSound(array, m);
+                    yield return MakeSound(array, j);
 
                     yield return Pause(delay);
                 }
 
-                yield return Swap(digits, m, i);
+                yield return Swap(array, m, i);
                 digits[i].State = DigitState.Sorted;
             }
 
             Console.WriteLine("Done!");
         }
 
-        public static IEnumerator Shuffle(Digit[] digits)
+        public static IEnumerator Shuffle(SortArray array)
         {
             Console.Write("[SortVisualizer] Shuffling... ");
 
             var random = new Random();
-            var delay = App.Instance.SimulationDelay;
+            var digits = array.Digits;
+            var delay = array.App.SimulationDelay;
 
             for (int i = 0; i < digits.Length; i++)
             {
@@ -119,7 +134,7 @@ namespace SortVisualizer
 
                 yield return Pause(delay);
 
-                yield return Swap(digits, i, j);
+                yield return Swap(array, i, j);
                 yield return Pause(delay);
 
                 digits[i].State = DigitState.None;
@@ -131,11 +146,12 @@ namespace SortVisualizer
             Console.WriteLine("Done!");
         }
 
-        public static IEnumerator Traverse(Digit[] digits)
+        public static IEnumerator Traverse(SortArray array)
         {
             Console.Write("[SortVisualizer] Traversing... ");
 
-            var delay = App.Instance.SimulationDelay;
+            var digits = array.Digits;
+            var delay = array.App.SimulationDelay;
 
             for (int i = 0; i < digits.Length; i++)
                 digits[i].State = DigitState.None;
@@ -164,24 +180,28 @@ namespace SortVisualizer
                 yield return null;
         }
 
-        private static Note MakeSound(Digit[] digits, int i)
+        private static Note MakeSound(SortArray array, int i)
         {
-            float min = App.Instance.Canvas.MinValue;
-            float max = App.Instance.Canvas.MaxValue;
+            var digits = array.Digits;
+
+            float min = array.App.Canvas.MinValue;
+            float max = array.App.Canvas.MaxValue;
 
             float n = (digits[i].Value - min) / max;
-            float d = App.Instance.SimulationDelay;
-            float s = App.Instance.SoundSustain;
+            float d = array.App.SimulationDelay;
+            float s = array.App.SoundSustain;
 
             return new Note(d * s, 120 + 1200 * n * n);
         }
 
-        private static IEnumerator Swap(Digit[] digits, int i, int j)
+        private static IEnumerator Swap(SortArray array, int i, int j)
         {
+            var digits = array.Digits;
+
             (digits[i], digits[j]) = (digits[j], digits[i]);
 
-            yield return MakeSound(digits, i);
-            yield return MakeSound(digits, j);
+            yield return MakeSound(array, i);
+            yield return MakeSound(array, j);
         }
     }
 }

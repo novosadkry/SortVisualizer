@@ -5,8 +5,8 @@ namespace SortVisualizer
 {
     public class Canvas : Drawable
     {
+        public App App { get; set; }
         public Vector2i Size { get; set; }
-        public Digit[] Digits { get; set; }
 
         public int MaxValue { get; set; }
         public int MinValue { get; set; }
@@ -15,9 +15,11 @@ namespace SortVisualizer
 
         public void Draw(RenderTarget target, RenderStates states)
         {
-            for (int i = 0; i < Digits.Length; i++)
+            var digits = App.SortArray.Digits;
+
+            for (int i = 0; i < digits.Length; i++)
             {
-                var digit = Digits[i];
+                var digit = digits[i];
 
                 float value = digit.Value;
                 var state = digit.State;
@@ -31,13 +33,13 @@ namespace SortVisualizer
 
                 var pos = new Vector2f
                 {
-                    X = Size.X * ((float) i / Digits.Length),
+                    X = Size.X * ((float) i / digits.Length),
                     Y = Size.Y
                 };
 
                 var size = new Vector2f
                 {
-                    X =  Size.X * (1.0f / Digits.Length) - 0.5f,
+                    X =  Size.X * (1.0f / digits.Length) - 0.5f,
                     Y = -Size.Y * (value - MinValue) / MaxValue
                 };
 

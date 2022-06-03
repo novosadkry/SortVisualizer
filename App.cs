@@ -6,12 +6,9 @@ namespace SortVisualizer
 {
     public class App
     {
-        private static readonly Lazy<App> Lazy 
-            = new(() => new App());
-
-        public static App Instance => Lazy.Value;
-
         public Canvas Canvas { get; }
+        public SortArray SortArray { get; set; }
+
         public bool EnableSound { get; set; }
         public float SimulationDelay { get; set; } 
         public float SoundSustain { get; set; }
@@ -19,7 +16,7 @@ namespace SortVisualizer
         private readonly Emitter _emitter;
         private readonly LinkedList<IEnumerator> _queue;
 
-        private App()
+        public App()
         {
             Canvas = new Canvas();
             _emitter = new Emitter();
@@ -46,18 +43,20 @@ namespace SortVisualizer
             if (EnableSound)
                 _emitter.Play();
 
+            Canvas.App = this;
             Canvas.Size = new Vector2i(800, 600);
-
-            Canvas.Digits = Enumerable.Range(1, 100)
-                .Select(x => (Digit)x)
-                .ToArray();
-
             Canvas.MinValue = 0;
             Canvas.MaxValue = 100;
 
-            _queue.AddLast(Sort.Shuffle(Canvas.Digits));
-            _queue.AddLast(Sort.BubbleSort(Canvas.Digits));
-            _queue.AddLast(Sort.Traverse(Canvas.Digits));
+            var digits = Enumerable.Range(1, 100)
+                .Select(x => (Digit)x)
+                .ToArray();
+
+            SortArray = new SortArray(this, digits);
+
+            _queue.AddLast(Sort.Shuffle(SortArray));
+            _queue.AddLast(Sort.BubbleSort(SortArray));
+            _queue.AddLast(Sort.Traverse(SortArray));
 
             Task.Run(HandleInput);
             Task.Run(SortEntry);
@@ -109,7 +108,7 @@ namespace SortVisualizer
 
                     lock (_queue)
                     {
-                        _queue.AddLast(sort.Function(Canvas.Digits));
+                        _queue.AddLast(sort.Function(SortArray));
                     }
                 }
             }

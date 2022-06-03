@@ -4,7 +4,7 @@
     {
         public static void Main(string[] args)
         {
-            var app = App.Instance;
+            var app = new App();
             app.SimulationDelay = 0.1f;
             app.SoundSustain = 1.0f;
             app.EnableSound = true;
