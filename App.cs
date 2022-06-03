@@ -6,20 +6,17 @@ namespace SortVisualizer
 {
     public class App
     {
+        public Audio Audio { get; }
         public Canvas Canvas { get; }
         public SortArray SortArray { get; set; }
+        public float SimulationDelay { get; set; }
 
-        public bool EnableSound { get; set; }
-        public float SimulationDelay { get; set; } 
-        public float SoundSustain { get; set; }
-
-        private readonly Emitter _emitter;
         private readonly LinkedList<IEnumerator> _queue;
 
         public App()
         {
+            Audio = new Audio();
             Canvas = new Canvas();
-            _emitter = new Emitter();
             _queue = new LinkedList<IEnumerator>();
         }
 
@@ -40,8 +37,7 @@ namespace SortVisualizer
 
         private void Init()
         {
-            if (EnableSound)
-                _emitter.Play();
+            Audio.Init();
 
             Canvas.App = this;
             Canvas.Size = new Vector2i(800, 600);
@@ -83,7 +79,7 @@ namespace SortVisualizer
                         _queue.AddFirst(e);
 
                     else if (iterator.Current is Note n)
-                        _emitter.AddNote(n);
+                        Audio.Play(n);
                 }
             }
         }

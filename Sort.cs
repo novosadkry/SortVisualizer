@@ -161,6 +161,7 @@ namespace SortVisualizer
             for (int i = 0; i < digits.Length; i++)
             {
                 digits[i].State = DigitState.Sorted;
+                yield return MakeSound(array, i);
                 yield return Pause(delay);
             }
 
@@ -189,7 +190,7 @@ namespace SortVisualizer
 
             float n = (digits[i].Value - min) / max;
             float d = array.App.SimulationDelay;
-            float s = array.App.SoundSustain;
+            float s = array.App.Audio.SoundSustain;
 
             return new Note(d * s, 120 + 1200 * n * n);
         }

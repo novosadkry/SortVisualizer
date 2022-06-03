@@ -4,10 +4,15 @@
     {
         public static void Main(string[] args)
         {
-            var app = new App();
-            app.SimulationDelay = 0.1f;
-            app.SoundSustain = 1.0f;
-            app.EnableSound = true;
+            var app = new App
+            {
+                SimulationDelay = 0.001f,
+                Audio = {
+                    Enabled = true,
+                    MaxEmitters = 128,
+                    SoundSustain = 20.0f
+                }
+            };
 
             app.Run();
         }

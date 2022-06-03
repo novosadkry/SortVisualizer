@@ -3,77 +3,88 @@ using SFML.System;
 
 namespace SortVisualizer
 {
-    public class Emitter : SoundStream
+    public class Audio
     {
-        private const int BufferSize = 4096;
-        private const int MaxOscillators = 128;
+        public bool Enabled { get; set; }
+        public int MaxEmitters { get; set; }
+        public float SoundSustain { get; set; }
 
-        public Emitter()
+        private readonly List<Emitter> _emitters;
+
+        public Audio()
         {
-            Initialize(1, 44100);
-            Oscillators = new List<Oscillator>(MaxOscillators);
+            Enabled = true;
+            MaxEmitters = 128;
+            SoundSustain = 2f;
+
+            _emitters = new List<Emitter>(MaxEmitters);
         }
 
-        private List<Oscillator> Oscillators { get; }
+        public void Init()
+        {
+            for (int i = 0; i < MaxEmitters; i++)
+            {
+                _emitters.Add(new Emitter(
+                    new Oscillator(new Note(0, 0))
+                ));
+            }
+
+            _emitters.ForEach(x => x.Play());
+        }
+
+        public void Play(Note note)
+        {
+            if (!Enabled)
+                return;
+
+            var oldest = _emitters
+                .MaxBy(x => x.Oscillator.TimeSpent);
+
+            if (oldest == null) return;
+            oldest.Oscillator = new Oscillator(note);
+        }
+    }
+
+    public class Emitter : SoundStream
+    {
+        public const int BufferSize = 4096;
+        public Oscillator Oscillator { get; set; }
+
+        public Emitter(Oscillator oscillator)
+        {
+            Initialize(1, 44100);
+            Oscillator = oscillator;
+        }
+
         private readonly short[] _samples = new short[BufferSize];
 
         protected override bool OnGetData(out short[] samples)
         {
             Array.Clear(_samples, 0, _samples.Length);
-
-            lock (Oscillators)
-            {
-                double step = 1.0 / SampleRate;
-                double amp = 1.0 / Oscillators.Count;
-
-                foreach (var osc in Oscillators)
-                {
-                    if (osc.Ended)
-                        continue;
-
-                    var env = osc.Note.Envelope;
-
-                    double x = osc.TimeSpent;
-                    double d = osc.Note.Duration;
-
-                    for (int i = 0; i < _samples.Length; i++)
-                    {
-                        _samples[i] += (short)(osc.Wave(x) * env.ADSR(x / d) * amp);
-                        x += step;
-                    }
-
-                    osc.TimeSpent = x;
-                }
-            }
-
             samples = _samples;
-            return true;
-        }
 
-        public void AddNote(Note note)
-        {
-            lock (Oscillators)
+            var osc = Oscillator;
+
+            if (osc.Ended) return true;
+            var env = osc.Note.Envelope;
+
+            double x = osc.TimeSpent;
+            double d = osc.Note.Duration;
+            double step = 1.0 / SampleRate;
+
+            for (int i = 0; i < _samples.Length; i++)
             {
-                if (Oscillators.Count < MaxOscillators)
-                {
-                    Oscillators.Add(new Oscillator(note));
-                    return;
-                }
-
-                var oldest = Oscillators
-                    .MaxBy(x => x.TimeSpent);
-
-                if (oldest == null)
-                    return;
-
-                oldest.Note = note;
-                oldest.TimeSpent = 0.0;
+                _samples[i] += (short)(osc.Wave(x) * env.ADSR(x / d));
+                x += step;
             }
+
+            osc.TimeSpent = x;
+            return true;
         }
 
         protected override void OnSeek(Time timeOffset)
         {
-            throw new NotImplementedException();
+            Oscillator.TimeSpent = timeOffset.AsSeconds();
         }
     }
 
