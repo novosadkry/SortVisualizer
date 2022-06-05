@@ -38,7 +38,9 @@ namespace SortVisualizer
                 return;
 
             var oldest = _emitters
-                .MaxBy(x => x.Oscillator.TimeSpent);
+                .OrderByDescending(x => x.Oscillator.Ended)
+                .ThenByDescending(x => x.Oscillator.TimeSpent)
+                .FirstOrDefault();
 
             if (oldest == null) return;
             oldest.Oscillator = new Oscillator(note);
