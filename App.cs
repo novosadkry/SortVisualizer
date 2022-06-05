@@ -6,7 +6,7 @@ namespace SortVisualizer
 {
     public class App
     {
-        public Audio Audio { get; }
+        public Mixer Audio { get; }
         public Canvas Canvas { get; }
         public SortArray SortArray { get; set; }
         public float SimulationDelay { get; set; }
@@ -15,7 +15,7 @@ namespace SortVisualizer
 
         public App()
         {
-            Audio = new Audio();
+            Audio = new Mixer();
             Canvas = new Canvas();
             SortArray = new SortArray(1, 100);
             _queue = new LinkedList<IEnumerator>();

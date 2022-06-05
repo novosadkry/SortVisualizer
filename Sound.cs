@@ -3,7 +3,7 @@ using SFML.System;
 
 namespace SortVisualizer
 {
-    public class Audio
+    public class Mixer
     {
         public bool Enabled { get; set; }
         public int MaxEmitters { get; set; }
@@ -11,7 +11,7 @@ namespace SortVisualizer
 
         private readonly List<Emitter> _emitters;
 
-        public Audio()
+        public Mixer()
         {
             Enabled = true;
             MaxEmitters = 128;
