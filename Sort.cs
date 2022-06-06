@@ -8,6 +8,7 @@ namespace SortVisualizer
         None,
         Selected,
         Sorted,
+        Pivot
     }
 
     public struct Digit
@@ -49,6 +50,7 @@ namespace SortVisualizer
         {
             new() { Name = "Shuffle", Function = Shuffle },
             new() { Name = "Traverse", Function = Traverse },
+            new() { Name = "QuickSort", Function = QuickSort },
             new() { Name = "BubbleSort", Function = BubbleSort },
             new() { Name = "SelectionSort", Function = SelectionSort }
         };
@@ -124,6 +126,80 @@ namespace SortVisualizer
             Console.WriteLine("Done!");
         }
 
+        public static IEnumerator QuickSort(SortArray array)
+        {
+            Console.Write("[SortVisualizer] Performing QuickSort... ");
+
+            var digits = array.Digits;
+            var delay = array.App.SimulationDelay;
+
+            var stack = new Stack<int>();
+
+            stack.Push(0);
+            stack.Push(digits.Length - 1);
+
+            while (stack.Count > 0)
+            {
+                int r = stack.Pop();
+                int l = stack.Pop();
+
+                int p = l;
+                int m = digits[p].Value;
+
+                digits[l].State = DigitState.Sorted;
+                digits[r].State = DigitState.Sorted;
+
+                for (int i = l; i <= r; i++)
+                {
+                    digits[i].State = DigitState.Selected;
+                    digits[p].State = DigitState.Pivot;
+
+                    yield return Pause(delay);
+
+                    if (digits[i].Value < m)
+                    {
+                        digits[p].State = DigitState.None;
+                        digits[i].State = DigitState.None;
+
+                        yield return Swap(array, i, ++p);
+                    }
+
+                    digits[l].State = DigitState.Sorted;
+                    digits[r].State = DigitState.Sorted;
+
+                    yield return Pause(delay);
+
+                    digits[i].State = DigitState.None;
+                }
+
+                digits[p].State = DigitState.Pivot;
+                yield return Pause(delay);
+                yield return Swap(array, l, p);
+
+                digits[l].State = DigitState.Sorted;
+                digits[p].State = DigitState.Selected;
+                yield return Pause(delay);
+
+                digits[l].State = DigitState.None;
+                digits[r].State = DigitState.None;
+                digits[p].State = DigitState.None;
+
+                if (p - 1 > l)
+                {
+                    stack.Push(l);
+                    stack.Push(p - 1);
+                }
+
+                if (p + 1 < r)
+                {
+                    stack.Push(p + 1);
+                    stack.Push(r);
+                }
+            }
+
+            Console.WriteLine("Done!");
+        }
+
         public static IEnumerator Shuffle(SortArray array)
         {
             Console.Write("[SortVisualizer] Shuffling... ");
@@ -142,7 +218,7 @@ namespace SortVisualizer
                 yield return Pause(delay);
 
                 yield return Swap(array, i, j);
-                yield return Pause(delay * 20.0f);
+                yield return Pause(delay);
 
                 digits[i].State = DigitState.None;
                 digits[j].State = DigitState.None;
@@ -169,7 +245,7 @@ namespace SortVisualizer
             {
                 digits[i].State = DigitState.Sorted;
                 yield return MakeSound(array, i);
-                yield return Pause(delay * 20.0f);
+                yield return Pause(delay);
             }
 
             yield return Pause(delay);

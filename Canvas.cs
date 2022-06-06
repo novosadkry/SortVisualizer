@@ -27,6 +27,7 @@ namespace SortVisualizer
                 {
                     DigitState.Selected => Color.Red,
                     DigitState.Sorted => Color.Green,
+                    DigitState.Pivot => Color.Magenta,
                     _ => Color.White
                 };
 
