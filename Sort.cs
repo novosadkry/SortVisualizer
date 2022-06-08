@@ -58,6 +58,7 @@ namespace SortVisualizer
         public static IEnumerator BubbleSort(SortArray array)
         {
             Console.Write("[SortVisualizer] Performing BubbleSort... ");
+            var clock = new Clock();
 
             var digits = array.Digits;
             var delay = array.App.SimulationDelay;
@@ -84,12 +85,14 @@ namespace SortVisualizer
                 }
             }
 
-            Console.WriteLine("Done!");
+            float elapsed = clock.ElapsedTime.AsSeconds();
+            Console.WriteLine($"Done! (took {elapsed:F2}s)");
         }
 
         public static IEnumerator SelectionSort(SortArray array)
         {
             Console.Write("[SortVisualizer] Performing SelectionSort... ");
+            var clock = new Clock();
 
             var digits = array.Digits;
             var delay = array.App.SimulationDelay;
@@ -123,12 +126,14 @@ namespace SortVisualizer
                 digits[i].State = DigitState.Sorted;
             }
 
-            Console.WriteLine("Done!");
+            float elapsed = clock.ElapsedTime.AsSeconds();
+            Console.WriteLine($"Done! (took {elapsed:F2}s)");
         }
 
         public static IEnumerator QuickSort(SortArray array)
         {
             Console.Write("[SortVisualizer] Performing QuickSort... ");
+            var clock = new Clock();
 
             var digits = array.Digits;
             var delay = array.App.SimulationDelay;
@@ -155,6 +160,7 @@ namespace SortVisualizer
                     digits[p].State = DigitState.Pivot;
 
                     yield return Pause(delay);
+                    yield return MakeSound(array, i);
 
                     if (digits[i].Value < m)
                     {
@@ -197,12 +203,14 @@ namespace SortVisualizer
                 }
             }
 
-            Console.WriteLine("Done!");
+            float elapsed = clock.ElapsedTime.AsSeconds();
+            Console.WriteLine($"Done! (took {elapsed:F2}s)");
         }
 
         public static IEnumerator Shuffle(SortArray array)
         {
             Console.Write("[SortVisualizer] Shuffling... ");
+            var clock = new Clock();
 
             var random = new Random();
             var digits = array.Digits;
@@ -226,12 +234,14 @@ namespace SortVisualizer
                 yield return Pause(delay);
             }
 
-            Console.WriteLine("Done!");
+            float elapsed = clock.ElapsedTime.AsSeconds();
+            Console.WriteLine($"Done! (took {elapsed:F2}s)");
         }
 
         public static IEnumerator Traverse(SortArray array)
         {
             Console.Write("[SortVisualizer] Traversing... ");
+            var clock = new Clock();
 
             var digits = array.Digits;
             var delay = array.App.SimulationDelay;
@@ -253,7 +263,8 @@ namespace SortVisualizer
             for (int i = 0; i < digits.Length; i++)
                 digits[i].State = DigitState.None;
 
-            Console.WriteLine("Done!");
+            float elapsed = clock.ElapsedTime.AsSeconds();
+            Console.WriteLine($"Done! (took {elapsed:F2}s)");
         }
 
         public static IEnumerator Pause(float seconds)

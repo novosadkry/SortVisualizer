@@ -1,0 +1,1 @@
+delay:0,01 sustain:10 shuffle delay:0,001 quicksort delay:0,01 traverse

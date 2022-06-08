@@ -15,6 +15,9 @@
                 SortArray = new SortArray(0, 100)
             };
 
+            foreach (var cmd in args)
+                app.ParseCommand(cmd);
+
             app.Run();
         }
     }

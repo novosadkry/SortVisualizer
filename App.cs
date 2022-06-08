@@ -54,7 +54,7 @@ namespace SortVisualizer
             window.Draw(Canvas);
         }
 
-        private void SortEntry()
+        private Task SortEntry()
         {
             while (true)
             {
@@ -77,6 +77,19 @@ namespace SortVisualizer
 
         private async Task HandleInput()
         {
+            Console.CancelKeyPress += (s, e) =>
+            {
+                e.Cancel = true;
+
+                lock (_queue)
+                {
+                    if (_queue.Count > 0)
+                        Console.WriteLine("Canceled!");
+
+                    _queue.Clear();
+                }
+            };
+
             while (true)
             {
                 string? input = await Console.In.ReadLineAsync();
@@ -85,20 +98,74 @@ namespace SortVisualizer
                     continue;
 
                 string[] commands = input.Split(' ');
+
                 foreach (string command in commands)
-                {
-                    var sort = Sort.AvailableSorts
-                        .FirstOrDefault(x => x.Name.ToLower() == command);
-
-                    if (sort == null)
-                        continue;
-
-                    lock (_queue)
-                    {
-                        _queue.AddLast(sort.Function(SortArray));
-                    }
-                }
+                    ParseCommand(command);
             }
+        }
+
+        public void ParseCommand(string cmd)
+        {
+            IEnumerator? action = null;
+
+            if (cmd.StartsWith("delay"))
+            {
+                var split = cmd.Split(":");
+                if (split.Length < 2) return;
+
+                if (float.TryParse(split[1], out float v))
+                    action = SetSimulationDelay(v);
+            }
+
+            else if (cmd.StartsWith("pause"))
+            {
+                var split = cmd.Split(":");
+                if (split.Length < 2) return;
+
+                if (float.TryParse(split[1], out float v))
+                    action = Sort.Pause(v);
+            }
+
+            else if (cmd.StartsWith("sustain"))
+            {
+                var split = cmd.Split(":");
+                if (split.Length < 2) return;
+
+                if (float.TryParse(split[1], out float v))
+                    action = SetSoundSustain(v);
+            }
+
+            else
+            {
+                // Check if command corresponds to an available sort
+
+                var sort = Sort.AvailableSorts
+                    .FirstOrDefault(x => x.Name.ToLower() == cmd);
+
+                if (sort != null)
+                    action = sort.Function(SortArray);
+            }
+
+            if (action == null) 
+                return;
+
+            lock (_queue) { _queue.AddLast(action); }
+        }
+
+        private IEnumerator SetSimulationDelay(float seconds)
+        {
+            SimulationDelay = seconds;
+            Console.WriteLine($"[SortVisualizer] Simulation delay set to {seconds}s");
+
+            yield return null;
+        }
+
+        private IEnumerator SetSoundSustain(float value)
+        {
+            Audio.SoundSustain = value;
+            Console.WriteLine($"[SortVisualizer] Sound sustain set to {value}x");
+
+            yield return null;
         }
     }
 }
