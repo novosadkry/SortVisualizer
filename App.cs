@@ -135,6 +135,15 @@ namespace SortVisualizer
                     action = SetSoundSustain(v);
             }
 
+            else if (cmd.StartsWith("size"))
+            {
+                var split = cmd.Split(":");
+                if (split.Length < 2) return;
+
+                if (int.TryParse(split[1], out int v))
+                    action = SetArraySize(v);
+            }
+
             else
             {
                 // Check if command corresponds to an available sort
@@ -164,6 +173,14 @@ namespace SortVisualizer
         {
             Audio.SoundSustain = value;
             Console.WriteLine($"[SortVisualizer] Sound sustain set to {value}x");
+
+            yield return null;
+        }
+
+        private IEnumerator SetArraySize(int size)
+        {
+            SortArray = new SortArray(0, size) { App = this };
+            Console.WriteLine($"[SortVisualizer] Array size set to {size}");
 
             yield return null;
         }
