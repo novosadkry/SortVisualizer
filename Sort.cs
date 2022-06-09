@@ -52,7 +52,8 @@ namespace SortVisualizer
             new() { Name = "Traverse", Function = Traverse },
             new() { Name = "QuickSort", Function = QuickSort },
             new() { Name = "BubbleSort", Function = BubbleSort },
-            new() { Name = "SelectionSort", Function = SelectionSort }
+            new() { Name = "SelectionSort", Function = SelectionSort },
+            new() { Name = "InsertionSort", Function = InsertionSort }
         };
 
         public static IEnumerator BubbleSort(SortArray array)
@@ -123,6 +124,39 @@ namespace SortVisualizer
                 }
 
                 yield return Swap(array, m, i);
+                digits[i].State = DigitState.Sorted;
+            }
+
+            float elapsed = clock.ElapsedTime.AsSeconds();
+            Console.WriteLine($"Done! (took {elapsed:F2}s)");
+        }
+
+        public static IEnumerator InsertionSort(SortArray array)
+        {
+            Console.Write("[SortVisualizer] Performing InsertionSort... ");
+            var clock = new Clock();
+
+            var digits = array.Digits;
+            var delay = array.App.SimulationDelay;
+
+            for (int i = 1; i < digits.Length; i++)
+            {
+                for (int j = i; j > 0; j--)
+                {
+                    if (digits[j].Value > digits[j - 1].Value)
+                        break;
+
+                    digits[j].State = DigitState.Selected;
+                    digits[j - 1].State = DigitState.Selected;
+
+                    yield return Pause(delay);
+                    yield return Swap(array, j, j - 1);
+                    yield return Pause(delay);
+
+                    digits[j].State = DigitState.Sorted;
+                    digits[j - 1].State = DigitState.Sorted;
+                }
+
                 digits[i].State = DigitState.Sorted;
             }
 
