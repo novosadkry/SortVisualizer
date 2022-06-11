@@ -83,10 +83,10 @@ namespace SortVisualizer
                     if (digits[a].Value > digits[b].Value)
                         yield return Swap(array, a, b);
 
-                    digits[a].State = DigitState.None;
-                    digits[b].State = DigitState.Sorted;
-
                     yield return Pause(delay);
+
+                    digits[a].State = DigitState.None;
+                    digits[b].State = DigitState.None;
                 }
             }
 
@@ -108,6 +108,7 @@ namespace SortVisualizer
 
                 for (int j = i + 1; j < digits.Length; j++)
                 {
+                    digits[i].State = DigitState.Sorted;
                     digits[j].State = DigitState.Selected;
 
                     yield return Pause(delay);
@@ -127,8 +128,9 @@ namespace SortVisualizer
                     yield return Pause(delay);
                 }
 
+                digits[i].State = DigitState.None;
+                digits[m].State = DigitState.None;
                 yield return Swap(array, m, i);
-                digits[i].State = DigitState.Sorted;
             }
 
             float elapsed = clock.ElapsedTime.AsSeconds();
@@ -150,6 +152,7 @@ namespace SortVisualizer
                     if (digits[j].Value > digits[j - 1].Value)
                         break;
 
+                    digits[i].State = DigitState.Sorted;
                     digits[j].State = DigitState.Selected;
                     digits[j - 1].State = DigitState.Selected;
 
@@ -157,11 +160,11 @@ namespace SortVisualizer
                     yield return Swap(array, j, j - 1);
                     yield return Pause(delay);
 
-                    digits[j].State = DigitState.Sorted;
-                    digits[j - 1].State = DigitState.Sorted;
+                    digits[j].State = DigitState.None;
+                    digits[j - 1].State = DigitState.None;
                 }
 
-                digits[i].State = DigitState.Sorted;
+                digits[i].State = DigitState.None;
             }
 
             float elapsed = clock.ElapsedTime.AsSeconds();
