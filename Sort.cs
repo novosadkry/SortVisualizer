@@ -8,7 +8,10 @@ namespace SortVisualizer
         None,
         Selected,
         Sorted,
-        Pivot
+        Pivot,
+        Primary,
+        Secondary,
+        Tertiary
     }
 
     public struct Digit
@@ -50,6 +53,7 @@ namespace SortVisualizer
         {
             new() { Name = "Shuffle", Function = Shuffle },
             new() { Name = "Traverse", Function = Traverse },
+            new() { Name = "HeapSort", Function = HeapSort },
             new() { Name = "QuickSort", Function = QuickSort },
             new() { Name = "BubbleSort", Function = BubbleSort },
             new() { Name = "SelectionSort", Function = SelectionSort },
@@ -235,6 +239,80 @@ namespace SortVisualizer
                     stack.Push(p + 1);
                     stack.Push(r);
                 }
+            }
+
+            float elapsed = clock.ElapsedTime.AsSeconds();
+            Console.WriteLine($"Done! (took {elapsed:F2}s)");
+        }
+
+        public static IEnumerator HeapSort(SortArray array)
+        {
+            Console.Write("[SortVisualizer] Performing HeapSort... ");
+            var clock = new Clock();
+
+            var digits = array.Digits;
+            var delay = array.App.SimulationDelay;
+
+            // Helper functions to calculate node indices
+            static int Left(int i) => i * 2 + 1;
+            static int Right(int i) => i * 2 + 2;
+            static int Parent(int i) => (i - 1) / 2;
+
+            // Choose digit state based on level of depth
+            static DigitState Exp(int i) => (DigitState)((int)DigitState.Primary + (int)Math.Log2(i + 1) % 3);
+
+            // Heapify up
+            for (int i = 1; i < digits.Length; i++)
+            {
+                digits[i].State = Exp(i);
+
+                int h = i;
+                int child = digits[h].Value;
+
+                while (h > 0 && child > digits[Parent(h)].Value)
+                {
+                    yield return Pause(delay);
+                    yield return Swap(array, h, Parent(h));
+                    yield return Pause(delay);
+
+                    digits[h].State = Exp(h);
+                    digits[Parent(h)].State = Exp(Parent(h));
+
+                    h = Parent(h);
+                }
+            }
+
+            // Swap first element with last to remove it
+            // then heapify down
+            for (int i = digits.Length - 1; i > 0; i--)
+            {
+                yield return Swap(array, i, 0);
+                digits[i].State = DigitState.Sorted;
+
+                int h = 0;
+                while (Left(h) < i && digits[Left(h)].Value > digits[h].Value ||
+                       Right(h) < i && digits[Right(h)].Value > digits[h].Value)
+                {
+                    if (Right(h) < i && digits[Left(h)].Value < digits[Right(h)].Value)
+                    {
+                        yield return Pause(delay);
+                        yield return Swap(array, h, Right(h));
+                        yield return Pause(delay);
+
+                        h = Right(h);
+                    }
+
+                    else
+                    {
+                        yield return Pause(delay);
+                        yield return Swap(array, h, Left(h));
+                        yield return Pause(delay);
+
+                        h = Left(h);
+                    }
+                }
+
+                digits[i].State = DigitState.None;
             }
 
             float elapsed = clock.ElapsedTime.AsSeconds();

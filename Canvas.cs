@@ -28,6 +28,9 @@ namespace SortVisualizer
                     DigitState.Selected => Color.Red,
                     DigitState.Sorted => Color.Green,
                     DigitState.Pivot => Color.Magenta,
+                    DigitState.Primary => new Color(255, 204, 204),
+                    DigitState.Secondary => new Color(255, 204, 153),
+                    DigitState.Tertiary => new Color(204, 255, 204),
                     _ => Color.White
                 };
 

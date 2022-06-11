@@ -102,7 +102,7 @@ namespace SortVisualizer
         {
             Envelope = new Envelope();
 
-            Amplitude = 3000;
+            Amplitude = 1000;
             Duration = duration;
             Frequency = frequency;
         }
