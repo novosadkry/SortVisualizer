@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using SFML.Graphics;
 using SFML.System;
 using SFML.Window;
 
@@ -18,6 +19,7 @@ namespace SortVisualizer
             Audio = new Mixer();
             Canvas = new Canvas();
             SortArray = new SortArray(1, 100);
+
             _queue = new LinkedList<IEnumerator>();
         }
 
@@ -28,25 +30,20 @@ namespace SortVisualizer
                 new VideoMode(800, 600)
             );
 
-            Init();
-
-            window.Init();
-            window.Tick += Draw;
-
-            window.Run();
-        }
-
-        private void Init()
-        {
-            Audio.Init();
-
-            Canvas.App = this;
-            Canvas.Size = new Vector2i(800, 600);
-
             SortArray.App = this;
+            Canvas.App = this;
+            Canvas.Size = window.Size;
+
+            Audio.Init();
 
             Task.Run(HandleInput);
             Task.Run(SortEntry);
+
+            window.Init();
+            window.Tick += Draw;
+            window.Resized += Resize;
+
+            window.Run();
         }
 
         private void Draw(Window window)
@@ -159,6 +156,14 @@ namespace SortVisualizer
                 return;
 
             lock (_queue) { _queue.AddLast(action); }
+        }
+
+        private void Resize(object? sender, SizeEventArgs e)
+        {
+            var window = sender as Window;
+            window?.SetView(new View(new FloatRect(0, 0, e.Width, e.Height)));
+
+            Canvas.Size = new Vector2u(e.Width, e.Height);
         }
 
         private IEnumerator SetSimulationDelay(float seconds)

@@ -6,7 +6,7 @@ namespace SortVisualizer
     public class Canvas : Drawable
     {
         public App App { get; set; }
-        public Vector2i Size { get; set; }
+        public Vector2u Size { get; set; }
 
         private readonly RectangleShape _column = new();
 
@@ -42,7 +42,7 @@ namespace SortVisualizer
 
                 var size = new Vector2f
                 {
-                    X =  Size.X * (1.0f / digits.Length) - 0.5f,
+                    X =  Size.X * (1.0f / digits.Length) - 1f,
                     Y = -Size.Y * (value - min) / max
                 };
 
