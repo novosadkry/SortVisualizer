@@ -15,8 +15,15 @@
                 SortArray = new SortArray(0, 100)
             };
 
-            foreach (var cmd in args)
-                app.ParseCommand(cmd);
+            try
+            {
+                foreach (var command in args)
+                    app.ParseCommand(command);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("[SortVisualizer] " + e.Message);
+            }
 
             app.Run();
         }

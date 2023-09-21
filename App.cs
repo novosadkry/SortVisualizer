@@ -98,8 +98,15 @@ namespace SortVisualizer
 
                 string[] commands = input.Split(' ');
 
-                foreach (string command in commands)
-                    ParseCommand(command);
+                try
+                {
+                    foreach (var command in commands)
+                        ParseCommand(command);
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine("[SortVisualizer] " + e.Message);
+                }
             }
         }
 
@@ -112,8 +119,10 @@ namespace SortVisualizer
                 var split = cmd.Split(":");
                 if (split.Length < 2) return;
 
-                if (float.TryParse(split[1], out float v))
-                    action = SetSimulationDelay(v);
+                if (!float.TryParse(split[1], out float v))
+                    throw new FormatException("Invalid command arguments");
+                
+                action = SetSimulationDelay(v);
             }
 
             else if (cmd.StartsWith("pause"))
@@ -121,8 +130,10 @@ namespace SortVisualizer
                 var split = cmd.Split(":");
                 if (split.Length < 2) return;
 
-                if (float.TryParse(split[1], out float v))
-                    action = Sort.Pause(v);
+                if (!float.TryParse(split[1], out float v))
+                    throw new FormatException("Invalid command arguments");
+
+                action = Sort.Pause(v);
             }
 
             else if (cmd.StartsWith("sustain"))
@@ -130,8 +141,10 @@ namespace SortVisualizer
                 var split = cmd.Split(":");
                 if (split.Length < 2) return;
 
-                if (float.TryParse(split[1], out float v))
-                    action = SetSoundSustain(v);
+                if (!float.TryParse(split[1], out float v))
+                    throw new FormatException("Invalid command arguments");
+                
+                action = SetSoundSustain(v);
             }
 
             else if (cmd.StartsWith("size"))
@@ -139,8 +152,10 @@ namespace SortVisualizer
                 var split = cmd.Split(":");
                 if (split.Length < 2) return;
 
-                if (int.TryParse(split[1], out int v))
-                    action = SetArraySize(v);
+                if (!int.TryParse(split[1], out int v))
+                    throw new FormatException("Invalid command arguments");
+                
+                action = SetArraySize(v);
             }
 
             else
@@ -154,8 +169,8 @@ namespace SortVisualizer
                     action = sort.Function(SortArray);
             }
 
-            if (action == null) 
-                return;
+            if (action == null)
+                throw new ArgumentException("Invalid command", nameof(cmd));
 
             lock (_queue) { _queue.AddLast(action); }
         }
