@@ -3,7 +3,7 @@ using SFML.System;
 
 namespace SortVisualizer
 {
-    public class Mixer
+    public sealed class Mixer : IDisposable
     {
         public bool Enabled { get; set; }
         public int MaxEmitters { get; set; }
@@ -44,6 +44,11 @@ namespace SortVisualizer
 
             if (oldest == null) return;
             oldest.Oscillator = new Oscillator(note);
+        }
+
+        public void Dispose()
+        {
+            _emitters.ForEach(x => x.Dispose());
         }
     }
 

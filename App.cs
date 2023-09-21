@@ -46,6 +46,8 @@ namespace SortVisualizer
 
             window.Run();
             cts.Cancel();
+
+            Audio.Dispose();
         }
 
         private void Draw(Window window)
