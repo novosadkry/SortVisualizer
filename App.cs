@@ -36,14 +36,16 @@ namespace SortVisualizer
 
             Audio.Init();
 
-            Task.Run(HandleInput);
-            Task.Run(SortEntry);
-
+            using var cts = new CancellationTokenSource();
+            ThreadPool.QueueUserWorkItem(Thread_HandleSort, cts.Token, false);
+            ThreadPool.QueueUserWorkItem(Thread_HandleInput, cts.Token, false);
+            
             window.Init();
             window.Tick += Draw;
             window.Resized += Resize;
 
             window.Run();
+            cts.Cancel();
         }
 
         private void Draw(Window window)
@@ -51,9 +53,9 @@ namespace SortVisualizer
             window.Draw(Canvas);
         }
 
-        private Task SortEntry()
+        private void Thread_HandleSort(CancellationToken token)
         {
-            while (true)
+            while (!token.IsCancellationRequested)
             {
                 lock (_queue)
                 {
@@ -72,7 +74,7 @@ namespace SortVisualizer
             }
         }
 
-        private async Task HandleInput()
+        private void Thread_HandleInput(CancellationToken token)
         {
             Console.CancelKeyPress += (s, e) =>
             {
@@ -87,9 +89,9 @@ namespace SortVisualizer
                 }
             };
 
-            while (true)
+            while (!token.IsCancellationRequested)
             {
-                string? input = await Console.In.ReadLineAsync();
+                string? input = Console.In.ReadLine();
 
                 if (string.IsNullOrWhiteSpace(input))
                     continue;
